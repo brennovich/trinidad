@@ -3,7 +3,7 @@ require 'tmpdir'
 
 namespace :tomcat do
   include TrinidadRakeHelpers
-  
+
   TOMCAT_MAVEN_REPO = 'http://repo2.maven.org/maven2/org/apache/tomcat'
 
   tomcat = "#{TOMCAT_MAVEN_REPO}/embed/tomcat-embed-core/%s/tomcat-embed-core-%s.jar"
@@ -11,7 +11,7 @@ namespace :tomcat do
   tomcat_logging = "#{TOMCAT_MAVEN_REPO}/embed/tomcat-embed-logging-log4j/%s/tomcat-embed-logging-log4j-%s.jar"
 
   dependencies = [ tomcat, tomcat_jasper, tomcat_logging ]
-  
+
   task :fetch, :version do |_, args|
     tomcat_version = [args[:version]] * 2
 
@@ -35,9 +35,9 @@ namespace :tomcat do
     end
     FileUtils.rm_r temp_dir
   end
-  
+
   TOMCAT_CORE_TARGET_DIR = File.expand_path('../../target/tomcat-core', __FILE__)
-  
+
   desc "Updates Tomcat to a given version e.g. `rake tomcat:update[7.0.30]`"
   task :update, :version do |_, args|
     Rake::Task['tomcat:fetch'].invoke(version = args[:version])
@@ -48,11 +48,11 @@ namespace :tomcat do
     file = File.read(path)
     file.gsub!(/TOMCAT_VERSION = '(.+)'/, "TOMCAT_VERSION = '#{version}'")
     File.open(path, 'w') { |io| io.write(file) }
-    
+
     puts "DONE - Tomcat's version has been updated to #{version} succesfully !\n"
     puts "`export trinidad_jars=true && bundle install` to use the local trinidad_jars gem with bundler"
   end
-  
+
   task :patch do
     Rake::Task['tomcat-core:jar'].invoke
   end
@@ -60,12 +60,11 @@ namespace :tomcat do
   task :clear do
     rm TOMCAT_CORE_JAR if File.exist?(TOMCAT_CORE_JAR)
   end
+
   task :clean => :clear
-  
 end
 
 namespace :'tomcat-core' do
-
   task :compile do
     mkdir_p TOMCAT_CORE_TARGET_DIR unless File.exist?(TOMCAT_CORE_TARGET_DIR)
     javac "src/tomcat-core/java", TOMCAT_CORE_TARGET_DIR
@@ -77,11 +76,11 @@ namespace :'tomcat-core' do
     end
     jar TOMCAT_CORE_TARGET_DIR, TOMCAT_CORE_JAR
   end
-  
+
   task :clear do
     rm_r TOMCAT_CORE_TARGET_DIR if File.exist?(TOMCAT_CORE_TARGET_DIR)
     rm TOMCAT_CORE_JAR if File.exist?(TOMCAT_CORE_JAR)
   end
+
   task :clean => :clear
-  
 end
